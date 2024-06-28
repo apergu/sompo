@@ -30,20 +30,21 @@ pipeline {
         }
     }
 
-  stages {
-    stage("PREPARE") {
-      steps {
-        script {
-            FAILED_STAGE=env.STAGE_NAME
-            echo "PREPARE"
-        }
+    stages {
+        stage("PREPARE") {
+            steps {
+                script {
+                    FAILED_STAGE=env.STAGE_NAME
+                    echo "PREPARE"
+                }
 
-        // Install Script
-        sh label: 'Preparation Script', script:
-        """
-            composer update --ignore-platform-reqs
-        """
-      }
+                // Install Script
+                sh label: 'Preparation Script', script:
+                """
+                    composer update --ignore-platform-reqs
+                """
+            }
+        }
     }
 
     stage("BUILD") {
