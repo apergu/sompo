@@ -13,6 +13,7 @@ pipeline {
     // def GIT_CREDENTIAL = "git.dev1.my.id"
     def GIT_HASH = sh(returnStdout: true, script: 'git log -1 --pretty=format:"%h"').trim()
     DOCKERHUB_CREDENTIALS = credentials('dockerhub-apergu')
+    SUDO_PASSWORD = credentials('your_sudo_password')
   }
 
   stages {
@@ -38,8 +39,7 @@ pipeline {
             echo "BUILD"
 
             //  sh label: 'Build Script', script:
-            def sudoPassword = 'Auful@123'
-            def command = "echo '${sudoPassword}' | sudo -S docker build -t apergudev/sompo-zd:latest ."
+            def command = "echo '${env.SUDO_PASSWORD}' | sudo -S docker build -t apergudev/sompo-zd:latest ."
 
                     // Execute the command
             sh label: 'Run Docker Build', script: command
