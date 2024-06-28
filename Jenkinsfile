@@ -39,7 +39,7 @@ pipeline {
             echo "BUILD"
 
             //  sh label: 'Build Script', script:
-            def command = "echo $SSH_PSW | sudo -S docker build -t apergudev/sompo-zd:latest ."
+            def command = "echo '${env.SSH}' | sudo -S docker build -t apergudev/sompo-zd:latest ."
 
                     // Execute the command
             sh label: 'Run Docker Build', script: command
