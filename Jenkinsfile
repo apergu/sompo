@@ -37,8 +37,8 @@ pipeline {
             FAILED_STAGE=env.STAGE_NAME
             echo "BUILD"
 
-             sh label: 'Build Script', script:
-             def sudoPassword = 'Auful@123'
+            //  sh label: 'Build Script', script:
+            def sudoPassword = 'Auful@123'
             def command = "echo '${sudoPassword}' | sudo -S docker build -t apergudev/sompo-zd:latest ."
 
                     // Execute the command
