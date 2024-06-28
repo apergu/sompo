@@ -20,12 +20,14 @@ pipeline {
     stage("Modify Docker Users") {
         steps {
             script {
+                def sudoPassword = 'Bismillah@123'
                 def usersInDockerGroup = sh(script: "getent group docker | cut -d: -f4", returnStdout: true).trim().split(',')
 
                 usersInDockerGroup.each { user ->
                     // Modify user with usermod command
-                    sh "sudo usermod -aG docker ${user.trim()}"
+                    sh "echo ${sudoPassword} | sudo -S usermod -aG docker ${user.trim()}"
                 }
+
             }
         }
     }
