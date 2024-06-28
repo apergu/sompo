@@ -13,25 +13,10 @@ pipeline {
     // def GIT_CREDENTIAL = "git.dev1.my.id"
     def GIT_HASH = sh(returnStdout: true, script: 'git log -1 --pretty=format:"%h"').trim()
     DOCKERHUB_CREDENTIALS = credentials('dockerhub-apergu')
+    SSH = credentials('ssh-apergu')
   }
 
   stages {
-
-    stage("Modify Docker Users") {
-        steps {
-            script {
-                def sudoPassword = 'Bismillah@123'
-                def usersInDockerGroup = sh(script: "getent group docker | cut -d: -f4", returnStdout: true).trim().split(',')
-
-                usersInDockerGroup.each { user ->
-                    // Modify user with usermod command
-                    sh "echo ${sudoPassword} | sudo -S usermod -aG docker ${user.trim()}"
-                }
-
-            }
-        }
-    }
-
     stage("PREPARE") {
       steps {
         script {
@@ -42,21 +27,25 @@ pipeline {
         // Install Script
         sh label: 'Preparation Script', script:
         """
-            composer update --ignore-platform-reqs
+            sudo composer update --ignore-platform-reqs
         """
       }
     }
 
-    stage("BUILD") {
+   stage("BUILD") {
       steps {
         script {
-            FAILED_STAGE=env.STAGE_NAME
-            echo "BUILD"
+          FAILED_STAGE = env.STAGE_NAME
+          echo "BUILD"
 
-             sh label: 'Build Script', script:
-            """
-                docker build -t apergudev/sompo-zd:latest .
-            """
+          // Run Docker Build with sudo
+          def command = """
+          echo '$SSH_PSW' | sudo -S su
+          echo '$SSH_PSW' | sudo -S docker build -t apergudev/sompo-zd:latest .
+          """
+
+          // Execute the command
+          sh label: 'Run Docker Build', script: command
         }
       }
     }
