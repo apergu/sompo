@@ -9,7 +9,7 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $connection = 'sqlsrv';
+    protected $connection = 'mysql';
 
     protected $table = 'Customer';
 
@@ -19,7 +19,7 @@ class Customer extends Model
 
 
     protected $fillable = [
-        'id',
+        'zd_id',
         'name',
         'email',
         'tags'
