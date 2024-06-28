@@ -13,7 +13,6 @@ pipeline {
     // def GIT_CREDENTIAL = "git.dev1.my.id"
     def GIT_HASH = sh(returnStdout: true, script: 'git log -1 --pretty=format:"%h"').trim()
     DOCKERHUB_CREDENTIALS = credentials('dockerhub-apergu')
-    SSH = credentials('ssh-apergu')
   }
 
   stages {
@@ -32,20 +31,16 @@ pipeline {
       }
     }
 
-   stage("BUILD") {
+    stage("BUILD") {
       steps {
         script {
-          FAILED_STAGE = env.STAGE_NAME
-          echo "BUILD"
+            FAILED_STAGE=env.STAGE_NAME
+            echo "BUILD"
 
-          // Run Docker Build with sudo
-          def command = """
-          echo '$SSH_PSW' | sudo -S su
-          echo '$SSH_PSW' | sudo -S docker build -t apergudev/sompo-zd:latest .
-          """
-
-          // Execute the command
-          sh label: 'Run Docker Build', script: command
+             sh label: 'Build Script', script:
+            """
+                docker build -t apergudev/sompo-zd:latest .
+            """
         }
       }
     }
