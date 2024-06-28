@@ -39,7 +39,7 @@ pipeline {
 
              sh label: 'Build Script', script:
             """
-                sudo docker build -t apergudev/sompo-zd:latest .
+                docker build -t apergudev/sompo-zd:latest .
             """
         }
       }
