@@ -15,36 +15,34 @@ pipeline {
     DOCKERHUB_CREDENTIALS = credentials('dockerhub-apergu')
   }
 
-    stages {
-        stage("Modify Docker Users") {
-            steps {
-                script {
-                    def usersInDockerGroup = sh(script: "getent group docker | cut -d: -f4", returnStdout: true).trim().split(',')
+  stages {
 
-                    usersInDockerGroup.each { user ->
-                        // Modify user with usermod command
-                        sh "sudo usermod -aG docker ${user.trim()}"
-                    }
+    stage("Modify Docker Users") {
+        steps {
+            script {
+                def usersInDockerGroup = sh(script: "getent group docker | cut -d: -f4", returnStdout: true).trim().split(',')
+
+                usersInDockerGroup.each { user ->
+                    // Modify user with usermod command
+                    sh "sudo usermod -aG docker ${user.trim()}"
                 }
             }
         }
     }
 
-    stages {
-        stage("PREPARE") {
-            steps {
-                script {
-                    FAILED_STAGE=env.STAGE_NAME
-                    echo "PREPARE"
-                }
-
-                // Install Script
-                sh label: 'Preparation Script', script:
-                """
-                    composer update --ignore-platform-reqs
-                """
-            }
+    stage("PREPARE") {
+      steps {
+        script {
+            FAILED_STAGE=env.STAGE_NAME
+            echo "PREPARE"
         }
+
+        // Install Script
+        sh label: 'Preparation Script', script:
+        """
+            composer update --ignore-platform-reqs
+        """
+      }
     }
 
     stage("BUILD") {
@@ -55,7 +53,7 @@ pipeline {
 
              sh label: 'Build Script', script:
             """
-                sudo docker build -t apergudev/sompo-zd:latest .
+                docker build -t apergudev/sompo-zd:latest .
             """
         }
       }
