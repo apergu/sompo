@@ -1,16 +1,14 @@
-properties(
-[pipelineTriggers([pollSCM('* * * * *')])]
-)
+properties([
+  pipelineTriggers([pollSCM('* * * * *')])
+])
 
 def FAILED_STAGE
 
 pipeline {
   agent any
 
-  //environment
+  // Environment variables
   environment {
-    // Repository
-    // def GIT_CREDENTIAL = "git.dev1.my.id"
     def GIT_HASH = sh(returnStdout: true, script: 'git log -1 --pretty=format:"%h"').trim()
     DOCKERHUB_CREDENTIALS = credentials('dockerhub-apergu')
     SSH = credentials('ssh-apergu')
@@ -20,14 +18,14 @@ pipeline {
     stage("PREPARE") {
       steps {
         script {
-            FAILED_STAGE=env.STAGE_NAME
-            echo "PREPARE"
+          FAILED_STAGE = env.STAGE_NAME
+          echo "PREPARE"
         }
 
         // Install Script
         sh label: 'Preparation Script', script:
         """
-            composer update --ignore-platform-reqs
+        composer update --ignore-platform-reqs
         """
       }
     }
@@ -35,14 +33,17 @@ pipeline {
     stage("BUILD") {
       steps {
         script {
-            FAILED_STAGE=env.STAGE_NAME
-            echo "BUILD"
+          FAILED_STAGE = env.STAGE_NAME
+          echo "BUILD"
 
-            //  sh label: 'Build Script', script:
-            def command = "echo '${env.SSH}' | sudo -S docker build -t apergudev/sompo-zd:latest ."
+          // Run Docker Build with sudo
+          def command = """
+          echo '${SSH}' | sudo -S su
+          echo '${SSH}' | sudo -S docker build -t apergudev/sompo-zd:latest .
+          """
 
-                    // Execute the command
-            sh label: 'Run Docker Build', script: command
+          // Execute the command
+          sh label: 'Run Docker Build', script: command
         }
       }
     }
@@ -50,14 +51,14 @@ pipeline {
     stage("RELEASE") {
       steps {
         script {
-          FAILED_STAGE=env.STAGE_NAME
+          FAILED_STAGE = env.STAGE_NAME
           echo "RELEASE"
         }
 
         sh label: 'STEP RELEASE', script:
         """
-          echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-          docker push apergudev/sompo-zd:latest
+        echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+        docker push apergudev/sompo-zd:latest
         """
       }
     }
