@@ -38,9 +38,11 @@ pipeline {
             echo "BUILD"
 
              sh label: 'Build Script', script:
-            """
-                sudo -S <<< 'Auful@123' docker build -t apergudev/sompo-zd:latest .
-            """
+             def sudoPassword = 'Auful@123'
+            def command = "echo '${sudoPassword}' | sudo -S docker build -t apergudev/sompo-zd:latest ."
+
+                    // Execute the command
+            sh label: 'Run Docker Build', script: command
         }
       }
     }
