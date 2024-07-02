@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BlastingController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ReportsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,5 +28,10 @@ Route::prefix('v1')->group(function () {
     Route::prefix('customer')->group(function () {
         Route::get('/', [CustomerController::class, 'index']);
         Route::post('/', [CustomerController::class, 'store']);
+    });
+
+    Route::prefix('reports')->group(function() {
+        Route::get('/', [ReportsController::class, 'index']);
+        Route::get('/received', [ReportsController::class, 'received']);
     });
 });

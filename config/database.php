@@ -89,8 +89,17 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'encrypt' => env('DB_ENCRYPT', 'no'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            // 'options' => [
+            //     // Valid PDO options for sqlsrv
+            //     PDO::SQLSRV_ATTR_ENCODING => PDO::SQLSRV_ENCODING_UTF8,
+            //     // PDO::ATTR_STRINGIFY_FETCHES => false,
+            //     PDO::ATTR_CASE => PDO::CASE_NATURAL,
+            //     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            //     PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
+            //     PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true,
+            // ],
         ],
 
     ],
