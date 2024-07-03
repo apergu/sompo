@@ -14,44 +14,48 @@ class BlastingController extends Controller
     public function index()
     {
         try {
+            $res = [];
             $blasting = Blasting::where([
                 'SendNow' => 'Y'
             ])->get();
 
             if (count($blasting) > 0) {
-                return response()->json($blasting);
+                $host = $this->ssh_host;
+                $port = $this->ssh_port;
+                $username = $this->ssh_user;
+                $password = $this->ssh_pass;
+                $url = $this->base_url."/sendsms/v2";
+
+                foreach ($blasting as $value) {
+                    $postData = json_encode('{"loginid": "'.$this->ims_premium_user.'", "password": "'.$this->ims_premium_pass.'", "sender": "myBrand", "msisdn": "'.$value['MobileNo'].'", "msg": "'.$value['Message'].'", "referenceid": "'.$value['TxReference'].'"}');
+                    $command = "curl --request POST \
+                    --url $url \
+                    --header 'Content-Type: application/json' \
+                    --data $postData";
+
+                    $sshService = new SshService($host, $port, $username, $password);
+                    $output = $sshService->execute($command);
+
+                    // Extract JSON from the output
+                    preg_match('/\{.*\}/s', $output, $matches);
+                    $jsonOutput = $matches[0] ?? null;
+                    $response = json_decode($jsonOutput, true);
+
+                    $update = Blasting::where('BroadcastID', $value['BroadcastID'])->first();
+                    $update->SendNow = 'N';
+                    $update->update();
+
+                    array_push($res, $response);
+                }
+
+                return response()->json($res);
             }
 
-            return response()->json($blasting);
+            return response()->json($res);
         } catch (Exception $e) {
             return response()->json([
                 'message' => $e->getMessage()
             ], 400);
-        }
-    }
-
-    public function test()
-    {
-        $host = $this->ssh_host;
-        $port = $this->ssh_port;
-        $username = $this->ssh_user;
-        $password = $this->ssh_pass;
-        $url = $this->base_url."/sendsms/v2";
-        $postData = json_encode("{'loginid': 'myloginid', 'password': 'fs#examplepassword', 'sender': 'myBrand', 'msisdn': '629111111', 'msg': 'hello', 'referenceid': 'abcdefg'}");
-        $command = "curl --request POST --url '$url' --header 'Content-Type: application/json' --data '$postData'";
-        
-        try {
-            $sshService = new SshService($host, $port, $username, $password);
-            $output = $sshService->execute($command);
-
-            return response()->json([
-                'code' => 0,
-                'message' => $output
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ]);
         }
     }
 }

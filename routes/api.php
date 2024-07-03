@@ -27,7 +27,6 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('blasting')->group(function() {
         Route::get('/', [BlastingController::class, 'index']);
-        Route::get('/testing', [BlastingController::class, 'test']);
     });
 
     Route::prefix('customer')->group(function () {
