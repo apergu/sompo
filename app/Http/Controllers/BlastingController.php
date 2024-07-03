@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use Exception;
 
 use App\Models\Blasting;
@@ -13,6 +14,7 @@ class BlastingController extends Controller
     //
     public function index()
     {
+        DB::beginTransaction();
         try {
             $res = [];
             $blasting = Blasting::where([
@@ -48,11 +50,14 @@ class BlastingController extends Controller
                     array_push($res, $response);
                 }
 
+                DB::commit();
+
                 return response()->json($res);
             }
 
             return response()->json($res);
         } catch (Exception $e) {
+            DB::rollback();
             return response()->json([
                 'message' => $e->getMessage()
             ], 400);
