@@ -23,7 +23,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::prefix('v1')->group(function () {
-    Route::get('blasting', [BlastingController::class, 'index']);
+    // Route::get('blasting', [BlastingController::class, 'index']);
+
+    Route::prefix('blasting')->group(function() {
+        Route::get('/', [BlastingController::class, 'index']);
+        Route::get('/testing', [BlastingController::class, 'test']);
+    });
 
     Route::prefix('customer')->group(function () {
         Route::get('/', [CustomerController::class, 'index']);
