@@ -37,6 +37,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN composer install --ignore-platform-reqs
 
 RUN php artisan key:generate
+RUN php artisan optimize:clear
 
 
 # EXPOSE 8080

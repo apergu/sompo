@@ -22,6 +22,10 @@ class Controller extends BaseController
         $this->ims_regular_pass = env('IMS_REGULAR_PASS');
         $this->ims_premium_user = env('IMS_PREMIUM_USER');
         $this->ims_premium_pass = env('IMS_PREMIUM_PASS');
+        $this->ssh_host = env('SSH_HOST');
+        $this->ssh_port = env('SSH_PORT');
+        $this->ssh_user = env('SSH_USER');
+        $this->ssh_pass = env('SSH_PASS');
     }
 
     public function req($method, $endpoint, $data = array(), $token = false, $trial = 0)
