@@ -9,7 +9,7 @@ services:
         depends_on:
             - db
         environment:
-            DB_HOST: db
+            DB_HOST: 127.0.0.1
             DB_DATABASE: sompo_cust
             DB_USERNAME: root
             DB_PASSWORD:
