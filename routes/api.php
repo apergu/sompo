@@ -25,16 +25,17 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function () {
     // Route::get('blasting', [BlastingController::class, 'index']);
 
-    Route::prefix('blasting')->group(function() {
+    Route::prefix('blasting')->group(function () {
         Route::get('/', [BlastingController::class, 'index']);
     });
 
     Route::prefix('customer')->group(function () {
-        Route::get('/', [CustomerController::class, 'index']);
+        Route::get('/', [CustomerController::class, 'index'])->name('customer.index');
+        Route::get('/download', [CustomerController::class, 'downloadExcel'])->name('customer.download');
         Route::post('/', [CustomerController::class, 'store']);
     });
 
-    Route::prefix('reports')->group(function() {
+    Route::prefix('reports')->group(function () {
         Route::get('/', [ReportsController::class, 'index']);
         Route::get('/received', [ReportsController::class, 'received']);
     });
