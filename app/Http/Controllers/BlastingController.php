@@ -35,10 +35,10 @@ class BlastingController extends Controller
                     --header 'Content-Type: application/json' \
                     --data $postData";
 
-                    dd($command);
-
                     $sshService = new SshService($host, $port, $username, $password);
                     $output = $sshService->execute($command);
+
+                    dd($output);
 
                     // Extract JSON from the output
                     preg_match('/\{.*\}/s', $output, $matches);
