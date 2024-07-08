@@ -28,14 +28,14 @@ class BlastingController extends Controller
                 $password = $this->ssh_pass;
                 $url = $this->base_url."/sendsms/v2";
 
-                dd($url);
-
                 foreach ($blasting as $value) {
                     $postData = json_encode('{"loginid": "'.$this->ims_premium_user.'", "password": "'.$this->ims_premium_pass.'", "sender": "myBrand", "msisdn": "'.$value['MobileNo'].'", "msg": "'.$value['Message'].'", "referenceid": "'.$value['TxReference'].'"}');
                     $command = "curl --request POST \
                     --url $url \
                     --header 'Content-Type: application/json' \
                     --data $postData";
+
+                    dd($command);
 
                     $sshService = new SshService($host, $port, $username, $password);
                     $output = $sshService->execute($command);
