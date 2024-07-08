@@ -9,6 +9,8 @@ use App\Models\Blasting;
 use App\Services\SshService;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Http;
+
 class BlastingController extends Controller
 {
     //
@@ -29,22 +31,31 @@ class BlastingController extends Controller
                 $url = $this->base_url."/sendsms/v2";
 
                 foreach ($blasting as $value) {
-                    $postData = json_encode('{"loginid": "'.$this->ims_premium_user.'", "password": "'.$this->ims_premium_pass.'", "sender": "myBrand", "msisdn": "'.$value['MobileNo'].'", "msg": "'.$value['Message'].'", "referenceid": "'.$value['TxReference'].'"}');
-                    $command = "curl --request POST --url $url --header 'Content-Type: application/json' --data $postData";
+                    $response = Http::post($url, [
+                        'loginid' => $this->ims_premium_user,
+                        'password' => $this->ims_premium_pass,
+                        'sender' => 'myBrand',
+                        'msisdn' => $value['MobileNo'],
+                        'msg' => $value['Message'],
+                        'referenceid' => $value['TxReference']
+                    ]);
 
-                    $sshService = new SshService($host, $port, $username, $password);
-                    $output = $sshService->execute($command);
+                    // $postData = json_encode('{"loginid": "'.$this->ims_premium_user.'", "password": "'.$this->ims_premium_pass.'", "sender": "myBrand", "msisdn": "'.$value['MobileNo'].'", "msg": "'.$value['Message'].'", "referenceid": "'.$value['TxReference'].'"}');
+                    // $command = "curl --request POST --url $url --header 'Content-Type: application/json' --data $postData";
 
-                    // Extract JSON from the output
-                    preg_match('/\{.*\}/s', $output, $matches);
-                    $jsonOutput = $matches[0] ?? null;
-                    $response = json_decode($jsonOutput, true);
+                    // $sshService = new SshService($host, $port, $username, $password);
+                    // $output = $sshService->execute($command);
 
-                    $update = Blasting::where('BroadcastID', $value['BroadcastID'])->first();
-                    $update->SendNow = 'N';
-                    $update->update();
+                    // // Extract JSON from the output
+                    // preg_match('/\{.*\}/s', $output, $matches);
+                    // $jsonOutput = $matches[0] ?? null;
+                    // $response = json_decode($jsonOutput, true);
 
-                    array_push($res, $response);
+                    // $update = Blasting::where('BroadcastID', $value['BroadcastID'])->first();
+                    // $update->SendNow = 'N';
+                    // $update->update();
+
+                    array_push($res, $response->json());
                 }
 
                 DB::commit();
