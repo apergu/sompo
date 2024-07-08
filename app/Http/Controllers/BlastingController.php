@@ -30,13 +30,9 @@ class BlastingController extends Controller
 
                 foreach ($blasting as $value) {
                     $postData = json_encode('{"loginid": "'.$this->ims_premium_user.'", "password": "'.$this->ims_premium_pass.'", "sender": "myBrand", "msisdn": "'.$value['MobileNo'].'", "msg": "'.$value['Message'].'", "referenceid": "'.$value['TxReference'].'"}');
-                    $command = "curl --request POST \
-                    --url $url \
-                    --header 'Content-Type: application/json' \
-                    --data $postData";
+                    $command = "curl --request POST --url $url --header 'Content-Type: application/json' --data $postData";
 
                     $sshService = new SshService($host, $port, $username, $password);
-                    dd($sshService);
                     $output = $sshService->execute($command);
 
                     // Extract JSON from the output
