@@ -74,9 +74,8 @@ RUN pecl install amqp \
 RUN apt-get update && apt-get install -y \
     unixodbc-dev \
     && pecl install sqlsrv pdo_sqlsrv \
-    && docker-php-ext-enable sqlsrv pdo_sqlsrv
-    
-RUN ACCEPT_EULA=Y apt-get install msodbcsql17
+    && docker-php-ext-enable sqlsrv pdo_sqlsrv \
+    && ACCEPT_EULA=Y apt-get install msodbcsql17
 
 # Work Directory
 RUN mkdir -p /var/www/${PROJECT}
