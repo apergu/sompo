@@ -69,6 +69,13 @@ RUN docker-php-ext-install bcmath pdo pdo_mysql
 RUN pecl install amqp \
     && docker-php-ext-enable amqp
 
+
+# Install sqlsrv and pdo_sqlsrv extensions
+RUN apt-get update && apt-get install -y \
+    unixodbc-dev \
+    && pecl install sqlsrv pdo_sqlsrv \
+    && docker-php-ext-enable sqlsrv pdo_sqlsrv
+
 # Work Directory
 RUN mkdir -p /var/www/${PROJECT}
 WORKDIR /var/www/${PROJECT}
