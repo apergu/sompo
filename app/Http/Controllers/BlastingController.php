@@ -21,10 +21,6 @@ class BlastingController extends Controller
                 'SendNow' => 'Y'
             ])->get();
 
-            echo "<pre>";
-            print_r($blasting);
-            die;
-
             if (count($blasting) > 0) {
                 $host = $this->ssh_host;
                 $port = $this->ssh_port;
