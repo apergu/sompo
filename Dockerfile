@@ -128,8 +128,6 @@ RUN pecl install amqp \
 # Install sqlsrv and pdo_sqlsrv extensions
 RUN pecl install sqlsrv pdo_sqlsrv \
     && docker-php-ext-enable sqlsrv pdo_sqlsrv
-    
-RUN ACCEPT_EULA=Y apt-get install msodbcsql17
 
 # Work Directory
 RUN mkdir -p /var/www/${PROJECT}
