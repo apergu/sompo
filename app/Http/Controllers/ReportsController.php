@@ -2,20 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use DB;
 use Exception;
 
+use App\Exports\ReportsExport;
 use App\Models\DeliveryReport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Service Reports'
-        ]);
+        $filters = ['transid', 'description', 'referenceid', 'drsource'];
+        $delivery_reports = DeliveryReport::where(function ($query) use ($request, $filters) {
+            foreach ($filters as $filter) {
+                if ($request->has('search')) {
+                    $query->orWhere($filter, 'like', '%' . $request->search . '%');
+                }
+            }
+        })->paginate(10);
+
+        return view('reports.index', compact('delivery_reports'));
+    }
+
+    public function downloadExcel()
+    {
+        return Excel::download(new ReportsExport, 'delivery_reports.xlsx');
     }
 
     public function detailCode($status_code)
@@ -195,6 +209,7 @@ class ReportsController extends Controller
             $delivery_reports->description = $detail_code['description'];
             $delivery_reports->chargable = $detail_code['chargable'];
             $delivery_reports->drsource = $detail_code['dr_source'];
+            $delivery_reports->created_at = Carbon::now();
             $delivery_reports->save();
 
             DB::commit();

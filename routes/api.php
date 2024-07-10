@@ -30,13 +30,14 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::prefix('customer')->group(function () {
-        Route::get('/', [CustomerController::class, 'index'])->name('customer.index');
+        Route::get('/', [CustomerController::class, 'index'])->name('customer.api.index');
         Route::get('/download', [CustomerController::class, 'downloadExcel'])->name('customer.download');
         Route::post('/', [CustomerController::class, 'store']);
     });
 
     Route::prefix('reports')->group(function () {
-        Route::get('/', [ReportsController::class, 'index']);
+        Route::get('/', [ReportsController::class, 'index'])->name('reports.api.index');
+        Route::get('/download', [ReportsController::class, 'downloadExcel'])->name('reports.download');
         Route::get('/received', [ReportsController::class, 'received']);
     });
 });
