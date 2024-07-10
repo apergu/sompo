@@ -38,17 +38,23 @@
                 <th>Created</th>
             </tr>
 
-            @foreach ($customer as $cst)
+            @if (count($customer) > 0)
+                @foreach ($customer as $cst)
+                    <tr>
+                        <td>{{ $cst->id }}</td>
+                        <td>{{ $cst->zd_id }}</td>
+                        <td>{{ $cst->name }}</td>
+                        <td>{{ $cst->email }}</td>
+                        <td>
+                            {{ $cst->created_at->format('d M Y H:i:s') }}
+                        </td>
+                    </tr>
+                @endforeach
+            @else
                 <tr>
-                    <td>{{ $cst->id }}</td>
-                    <td>{{ $cst->zd_id }}</td>
-                    <td>{{ $cst->name }}</td>
-                    <td>{{ $cst->email }}</td>
-                    <td>
-                        {{ $cst->created_at->format('d M Y H:i:s') }}
-                    </td>
+                    <td colspan="5" class="text-center">Data not found</td>
                 </tr>
-            @endforeach
+            @endif
         </table>
 
         <div class="d-flex justify-content-end">
