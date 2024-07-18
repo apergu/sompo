@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use DB;
 use Exception;
 
@@ -21,7 +22,11 @@ class BlastingController extends Controller
             $res = [];
             $blasting = Blasting::where([
                 'SendNow' => 'Y'
-            ])->get();
+            ])
+            ->where('MobileNo', '!=', '')
+            ->whereDate('BroadcastDate', Carbon::now()->format('Y-m-d'))
+            ->limit(1)
+            ->get();
 
             if (count($blasting) > 0) {
                 $host = $this->ssh_host;
@@ -30,17 +35,19 @@ class BlastingController extends Controller
                 $password = $this->ssh_pass;
                 $url = $this->base_url."/sendsms/v2";
 
+                // dd($blasting);
+
                 foreach ($blasting as $value) {
                     $response = Http::post($url, [
                         'loginid' => $this->ims_premium_user,
                         'password' => $this->ims_premium_pass,
-                        'sender' => 'myBrand',
+                        'sender' => $this->brand,
                         'msisdn' => $value['MobileNo'],
                         'msg' => $value['Message'],
                         'referenceid' => $value['TxReference']
                     ]);
 
-                    // $postData = json_encode('{"loginid": "'.$this->ims_premium_user.'", "password": "'.$this->ims_premium_pass.'", "sender": "myBrand", "msisdn": "'.$value['MobileNo'].'", "msg": "'.$value['Message'].'", "referenceid": "'.$value['TxReference'].'"}');
+                    // $postData = json_encode('{"loginid": "'.$this->ims_premium_user.'", "password": "'.$this->ims_premium_pass.'", "sender": "'.$this->brand.'", "msisdn": "'.$value['MobileNo'].'", "msg": "'.$value['Message'].'", "referenceid": "'.$value['TxReference'].'"}');
                     // $command = "curl --request POST --url $url --header 'Content-Type: application/json' --data $postData";
 
                     // $sshService = new SshService($host, $port, $username, $password);
@@ -51,9 +58,9 @@ class BlastingController extends Controller
                     // $jsonOutput = $matches[0] ?? null;
                     // $response = json_decode($jsonOutput, true);
 
-                    // $update = Blasting::where('BroadcastID', $value['BroadcastID'])->first();
-                    // $update->SendNow = 'N';
-                    // $update->update();
+                    $update = Blasting::where('BroadcastID', $value['BroadcastID'])->first();
+                    $update->SendNow = 'F';
+                    $update->update();
 
                     array_push($res, $response->json());
                 }

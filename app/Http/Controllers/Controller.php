@@ -26,6 +26,7 @@ class Controller extends BaseController
         $this->ssh_port = env('SSH_PORT');
         $this->ssh_user = env('SSH_USER');
         $this->ssh_pass = env('SSH_PASS');
+        $this->brand = 'SOMPO';
     }
 
     public function req($method, $endpoint, $data = array(), $token = false, $trial = 0)
