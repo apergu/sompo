@@ -9,6 +9,8 @@ class Blasting extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $connection = 'sqlsrv';
 
     protected $table = 'Broadcast';
