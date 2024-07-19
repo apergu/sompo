@@ -25,7 +25,6 @@ class BlastingController extends Controller
             ])
             ->where('MobileNo', '!=', '')
             ->whereDate('BroadcastDate', Carbon::now()->format('Y-m-d'))
-            ->limit(1)
             ->get();
 
             if (count($blasting) > 0) {
@@ -34,8 +33,6 @@ class BlastingController extends Controller
                 $username = $this->ssh_user;
                 $password = $this->ssh_pass;
                 $url = $this->base_url."/sendsms/v2";
-
-                // dd($blasting);
 
                 foreach ($blasting as $value) {
                     $response = Http::post($url, [
