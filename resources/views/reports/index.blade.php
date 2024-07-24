@@ -31,31 +31,37 @@
         <table class="table table-striped table-bordered">
             <tr>
                 <th>No</th>
-                <th>Transaction ID</th>
+                <th>Schedule Date</th>
+                <th>Sent Date</th>
+                <th>Customer Name</th>
+                <th>Contact</th>
+                <th>Content</th>
                 <th>Reference ID</th>
                 <th>Chargable</th>
                 <th>DR Source</th>
                 <th>Status</th>
-                <th>Description</th>
-                <th>Created</th>
+                <th>Remark</th>
             </tr>
 
             @if (count($delivery_reports) > 0)
                 @foreach ($delivery_reports as $val)
                     <tr>
                         <td>{{ $val->id }}</td>
-                        <td>{{ $val->transid }}</td>
+                        <td>{{ $val->broadcast->BroadcastDate ?? '-' }}</td>
+                        <td>{{ $val->broadcast->ConfirmDate ?? '-' }}</td>
+                        <td>{{ $val->broadcast->ReceiverName ?? '-' }}</td>
+                        <td>{{ $val->broadcast->MobileNo ?? '-' }}</td>
+                        <td>{{ $val->broadcast->Message ?? '-' }}</td>
                         <td>{{ $val->referenceid }}</td>
                         <td>{{ $val->chargable }}</td>
                         <td>{{ $val->drsource }}</td>
                         <td>{{ $val->status }}</td>
                         <td>{{ $val->description }}</td>
-                        <td>{{ $val->created_at }}</td>
                     </tr>
                 @endforeach
             @else
                 <tr>
-                    <td colspan="8" class="text-center">Data not found</td>
+                    <td colspan="12" class="text-center">Data not found</td>
                 </tr>
             @endif
         </table>

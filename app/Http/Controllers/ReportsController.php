@@ -7,6 +7,7 @@ use DB;
 use Exception;
 
 use App\Exports\ReportsExport;
+use App\Models\Blasting;
 use App\Models\DeliveryReport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -22,7 +23,12 @@ class ReportsController extends Controller
                     $query->orWhere($filter, 'like', '%' . $request->search . '%');
                 }
             }
-        })->paginate(10);
+        })
+        ->paginate(10);
+
+        foreach ($delivery_reports as $key => $dr) {
+            $delivery_reports[$key]->broadcast = Blasting::where('TxReference', $dr->referenceid)->first();
+        }
 
         return view('reports.index', compact('delivery_reports'));
     }
