@@ -44,7 +44,7 @@ class BlastingController extends Controller
                         'referenceid' => $value['TxReference']
                     ]);
 
-                    // $postData = json_encode('{"loginid": "'.$this->ims_premium_user.'", "password": "'.$this->ims_premium_pass.'", "sender": "'.$this->brand.'", "msisdn": "'.$value['MobileNo'].'", "msg": "'.$value['Message'].'", "referenceid": "'.$value['TxReference'].'"}');
+                    // $postData = json_encode('{"loginid": "'.$this->ims_premium_user.'", "password": "'.$this->ims_premium_pass.'", "sender": "'.$this->brand.'", "msisdn": "6287887252018", "msg": "'.$value['Message'].'", "referenceid": "'.$value['TxReference'].'"}');
                     // $command = "curl --request POST --url $url --header 'Content-Type: application/json' --data $postData";
 
                     // $sshService = new SshService($host, $port, $username, $password);
@@ -57,6 +57,7 @@ class BlastingController extends Controller
 
                     $update = Blasting::where('BroadcastID', $value['BroadcastID'])->first();
                     $update->SendNow = 'F';
+                    $update->DeliveryDateTime = $response['ResultCode'] === 1 ? Carbon::now() : null;
                     $update->update();
 
                     array_push($res, $response->json());
