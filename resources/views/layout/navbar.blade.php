@@ -8,15 +8,18 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">{{ ucwords(Request::segment(1)) }}</a>
+                    <a class="nav-link active" aria-current="page" href="#">{{ ucwords(Request::segment(1) ?? 'Login') }}</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Other Menu</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('customer.index') }}">Customer</a></li>
-                        <li><a class="dropdown-item" href="{{ route('reports.index') }}">Reports</a></li>
-                    </ul>
-                </li>
+                @if (Auth::user())
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Other Menu</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('customer.index') }}">Customer</a></li>
+                            <li><a class="dropdown-item" href="{{ route('reports.index') }}">Reports</a></li>
+                            <li><a class="dropdown-item" href="{{ route('logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                @endif
                 {{-- <li class="nav-item">
                     <a class="nav-link" href="#">Pricing</a>
                 </li>
