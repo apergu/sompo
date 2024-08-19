@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use DB;
 use Exception;
+use Str;
 
 use App\Models\Blasting;
 use App\Services\SshService;
@@ -35,13 +36,14 @@ class BlastingController extends Controller
                 $url = $this->base_url."/sendsms/v2";
 
                 foreach ($blasting as $value) {
+                    $txreference = Str::uuid()->toString();
                     $response = Http::post($url, [
                         'loginid' => $this->ims_premium_user,
                         'password' => $this->ims_premium_pass,
                         'sender' => $this->brand,
                         'msisdn' => $value['MobileNo'],
                         'msg' => $value['Message'],
-                        'referenceid' => $value['TxReference']
+                        'referenceid' => $value['TxReference'] !== '' ? $value['TxReference'] : $txreference
                     ]);
 
                     // $postData = json_encode('{"loginid": "'.$this->ims_premium_user.'", "password": "'.$this->ims_premium_pass.'", "sender": "'.$this->brand.'", "msisdn": "6287887252018", "msg": "'.$value['Message'].'", "referenceid": "'.$value['TxReference'].'"}');
@@ -58,6 +60,9 @@ class BlastingController extends Controller
                     $update = Blasting::where('BroadcastID', $value['BroadcastID'])->first();
                     $update->SendNow = 'F';
                     $update->DeliveryDateTime = $response['ResultCode'] === 1 ? Carbon::now() : null;
+                    if ($value['TxReference'] === '') {
+                        $update->TxReference = $txreference;
+                    }
                     $update->update();
 
                     array_push($res, $response->json());
