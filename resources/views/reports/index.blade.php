@@ -7,7 +7,8 @@
 
     <div class="row d-flex justify-content-between">
         <div class="col-md-4">
-            <form action="{{ route('reports.index') }}" method="GET">
+            {{-- <form action="{{ route('reports.index') }}" method="GET"> --}}
+            <form action="https://smsgw.sompo.co.id/reports" method="GET">
                 <div class="pt-2 pb-4 input-group">
                     <input type="text" name="search" class="form-control" placeholder="Search" value="{{ request('search') }}" />
                     <div class="input-group-append">
