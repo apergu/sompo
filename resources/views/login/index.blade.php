@@ -25,8 +25,9 @@
             @endif
             <div class="row">
                 <div class="col-md-12">
+                    @php $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://'; @endphp
                     {{-- <form action="{{ route('action.login') }}" method="POST" enctype="multipart/form-data"> @csrf --}}
-                    <form action="https://smsgw.sompo.co.id/check-login" method="POST" enctype="multipart/form-data"> @csrf
+                    <form action="{{ $protocol.$_SERVER['HTTP_HOST'] }}/check-login" method="POST" enctype="multipart/form-data"> @csrf
                         <div data-mdb-input-init class="form-outline mb-4">
                             <label class="form-label">Username</label>
                             <input type="text" name="username" class="form-control" />

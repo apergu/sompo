@@ -1,5 +1,24 @@
 @extends('layout.layout')
 
+@section('style')
+<link href="https://unpkg.com/gijgo@1.9.14/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+@endsection
+
+@section('script')
+<script src="https://unpkg.com/gijgo@1.9.14/js/gijgo.min.js" type="text/javascript"></script>
+<script>
+    $('#dateFrom').datepicker({
+        uiLibrary: 'bootstrap5',
+        format: 'yyyy-mm-dd'
+    });
+
+    $('#dateTo').datepicker({
+        uiLibrary: 'bootstrap5',
+        format: 'yyyy-mm-dd'
+    })
+</script>
+@endsection
+
 @section('content')
     <div class="pt-3 pb-2">
         <h3 style="font-weight: 600">Reports</h3>
@@ -7,8 +26,15 @@
 
     <div class="row d-flex justify-content-between">
         <div class="col-md-4">
+            @php $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://'; @endphp
             {{-- <form action="{{ route('reports.index') }}" method="GET"> --}}
-            <form action="https://smsgw.sompo.co.id/reports" method="GET">
+            <form action="{{ $protocol.$_SERVER['HTTP_HOST'] }}/reports" method="GET">
+                <div class="col-md-12">
+                    <input type="text" name="from_date" class="form-control" placeholder="From Date" value="{{ $start_date }}" id="dateFrom" />
+                </div>
+                <div class="col-md-12">
+                    <input type="text" name="to_date" class="form-control" placeholder="To Date" value="{{ $end_date }}" id="dateTo" />
+                </div>
                 <div class="pt-2 pb-4 input-group">
                     <input type="text" name="search" class="form-control" placeholder="Search" value="{{ request('search') }}" />
                     <div class="input-group-append">
@@ -19,7 +45,7 @@
         </div>
         <div class="col-md-1">
             <div class="text-end pt-2">
-                <a class="btn btn-sm btn-primary mt-auto" target="_blank" href="{{ route('reports.download') }}">
+                <a class="btn btn-sm btn-primary mt-auto" target="_blank" href="{{ route('reports.download') }}{{ $params }}">
                     <span class="material-symbols-outlined">
                         description
                     </span>
@@ -45,19 +71,25 @@
             </tr>
 
             @if (count($delivery_reports) > 0)
+                @php
+                    $no = 1;
+                    if ($delivery_reports->currentPage() > 1) {
+                        $no = ($delivery_reports->currentPage() - 1) * 10 + 1;
+                    }
+                @endphp
                 @foreach ($delivery_reports as $val)
                     <tr>
-                        <td>{{ $val->id }}</td>
-                        <td>{{ $val->broadcast->BroadcastDate ?? '-' }}</td>
-                        <td>{{ $val->broadcast->ConfirmDate ?? '-' }}</td>
-                        <td>{{ $val->broadcast->ReceiverName ?? '-' }}</td>
-                        <td>{{ $val->broadcast->MobileNo ?? '-' }}</td>
-                        <td>{{ $val->broadcast->Message ?? '-' }}</td>
-                        <td>{{ $val->referenceid }}</td>
-                        <td>{{ $val->chargable }}</td>
-                        <td>{{ $val->drsource }}</td>
-                        <td>{{ $val->status }}</td>
-                        <td>{{ $val->description }}</td>
+                        <td>{{ $no++ }}</td>
+                        <td>{{ $val->BroadcastDate ?? '-' }}</td>
+                        <td>{{ $val->DeliveryDateTime ?? '-' }}</td>
+                        <td>{{ $val->ReceiverName ?? '-' }}</td>
+                        <td>{{ $val->MobileNo ?? '-' }}</td>
+                        <td>{{ $val->Message ?? '-' }}</td>
+                        <td>{{ $val->deliveryReport->referenceid ?? '-' }}</td>
+                        <td>{{ $val->deliveryReport->chargable ?? '-' }}</td>
+                        <td>{{ $val->deliveryReport->drsource ?? '-' }}</td>
+                        <td>{{ $val->deliveryReport->status ?? '-' }}</td>
+                        <td>{{ $val->deliveryReport->description ?? '-' }}</td>
                     </tr>
                 @endforeach
             @else

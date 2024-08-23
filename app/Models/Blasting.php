@@ -16,4 +16,9 @@ class Blasting extends Model
     protected $table = 'Broadcast';
 
     protected $primaryKey = 'BroadcastID';
+
+    public function deliveryReport()
+    {
+        return $this->belongsTo(DeliveryReport::class, 'TxReference', 'referenceid');
+    }
 }
