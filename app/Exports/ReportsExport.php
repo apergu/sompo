@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Blasting;
 use App\Models\DeliveryReport;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -13,7 +14,18 @@ class ReportsExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        return DeliveryReport::all(['id', 'transid', 'referenceid', 'chargable', 'drsource', 'status', 'description', 'created_at']);
+        $reports = Blasting::with('deliveryReport')
+            ->select('BroadcastDate', 'DeliveryDateTime', 'ReceiverName', 'MobileNo', 'Message', 'TxReference', 'deliveryReport.chargable')
+            ->where('SendNow', 'F')
+            ->whereNotNull('DeliveryDateTime')
+            ->get();
+        // $testing = DeliveryReport::all(['id', 'transid', 'referenceid', 'chargable', 'drsource', 'status', 'description'])
+        //     ->with('mBlasting');
+
+        // dd($testing);
+
+        return $reports;
+        // return DeliveryReport::all(['id', 'transid', 'referenceid', 'chargable', 'drsource', 'status', 'description', 'created_at']);
     }
 
     /**
@@ -22,14 +34,16 @@ class ReportsExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'ID',
-            'Transaction ID',
+            'Schedule Date',
+            'Sent Date',
+            'Customer Name',
+            'Contact',
+            'Content',
             'Reference ID',
             'Chargable',
-            'DR Source',
-            'Status',
-            'Description',
-            'Created At'
+            // 'DR Source',
+            // 'Status',
+            // 'Remark'
         ];
     }
 }

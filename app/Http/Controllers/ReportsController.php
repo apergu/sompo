@@ -12,30 +12,44 @@ use App\Models\DeliveryReport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 class ReportsController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = ['transid', 'description', 'referenceid', 'drsource'];
-        $delivery_reports = DeliveryReport::where(function ($query) use ($request, $filters) {
-            foreach ($filters as $filter) {
-                if ($request->has('search')) {
-                    $query->orWhere($filter, 'like', '%' . $request->search . '%');
-                }
-            }
-        })
-        ->paginate(10);
+        $start_date = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $end_date = Carbon::now()->endOfMonth()->format('Y-m-d');
+        $search = $request->has('search') ? $request->search : '';
+        $params = '';
 
-        foreach ($delivery_reports as $key => $dr) {
-            $delivery_reports[$key]->broadcast = Blasting::where('TxReference', $dr->referenceid)->first();
+        if ($request->has('from_date') && $request->has('to_date')) {
+            $params = '?from_date='.$request->from_date.'&to_date='.$request->to_end.'&search='.$search;
         }
 
-        return view('reports.index', compact('delivery_reports'));
-    }
+        $filters = ['ReceiverName', 'MobileNo', 'TxReference', 'Message'];
 
-    public function downloadExcel()
-    {
-        return Excel::download(new ReportsExport, 'delivery_reports.xlsx');
+        $delivery_reports = Blasting::with('deliveryReport')
+            ->where(function ($query) use ($request, $filters) {
+                foreach ($filters as $filter) {
+                    if ($request->has('search')) {
+                        $query->orWhere($filter, 'like', '%' . $request->search . '%');
+                    }
+                }
+            })
+            ->where('SendNow', 'F')
+            ->whereNotNull('DeliveryDateTime')
+            ->when($request->has('from_date') && $request->has('to_date'), function ($query) use ($request) {
+                $from_date = $request->from_date != null ? Carbon::createFromFormat('Y-m-d', $request->from_date) : Carbon::now()->startOfMonth();
+                $to_date = $request->to_date != null ? Carbon::createFromFormat('Y-m-d', $request->to_date) : Carbon::now()->endOfMOnth();
+
+                $query->whereDate('DeliveryDateTime', '>=', $from_date);
+                $query->whereDate('DeliveryDateTime', '<=', $to_date);
+            })
+            ->paginate(10);
+
+        return view('reports.index', compact('delivery_reports', 'start_date', 'end_date', 'search', 'params'));
     }
 
     public function detailCode($status_code)
@@ -234,5 +248,152 @@ class ReportsController extends Controller
                 'description' => $e->getMessage()
             ]);
         }
+    }
+
+    public function downloadExcel(Request $request)
+    {
+        $filters = ['ReceiverName', 'MobileNo', 'TxReference', 'Message'];
+
+        $data = Blasting::with('deliveryReport')
+            ->where(function ($query) use ($request, $filters) {
+                foreach ($filters as $filter) {
+                    if ($request->has('search')) {
+                        $query->orWhere($filter, 'like', '%' . $request->search . '%');
+                    }
+                }
+            })
+            ->where('SendNow', 'F')
+            ->whereNotNull('DeliveryDateTime')
+            ->when($request->has('from_date') && $request->has('to_date'), function ($query) use ($request) {
+                $from_date = $request->from_date != null ? Carbon::createFromFormat('Y-m-d', $request->from_date) : Carbon::now()->startOfMonth();
+                $to_date = $request->to_date != null ? Carbon::createFromFormat('Y-m-d', $request->to_date) : Carbon::now()->endOfMOnth();
+
+                $query->whereDate('DeliveryDateTime', '>=', $from_date);
+                $query->whereDate('DeliveryDateTime', '<=', $to_date);
+            })
+            ->get();
+
+        $spreadsheet = new Spreadsheet();
+        $activeWorksheet = $spreadsheet->getActiveSheet();
+
+        $style_header = array(
+            'fill' => array(
+                'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'color' => array(
+                    'rgb' => 'BDBDBD'
+                )
+            ),
+            'font' => array(
+                'bold' => true,
+            )
+        );
+
+        $column_data = [
+            'No' => 'no',
+            'Schedule Date' => 'BroadcastDate',
+            'Send Date' => 'DeliveryDateTime',
+            'Customer Name' => 'ReceiverName',
+            'Contact' => 'MobileNo',
+            'Content' => 'Message',
+            'Reference ID' => 'TxReference',
+            'Chargable' => 'deliveryReportChargable',
+            'DR Source' => 'deliveryReportDRSource',
+            'Status' => 'deliveryReportStatus',
+            'Remark' => 'deliveryReportRemark'
+        ];
+
+        $first_column = 'A';
+        $column_letters = [];
+        for ($i = 0; $i < count($column_data); $i++) {
+            $column_letters[] = $first_column;
+
+            $first_column++;
+        }
+
+        for ($col = $column_letters[0]; $col !== end($column_letters); $col++) {
+            $spreadsheet->getActiveSheet()->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $spreadsheet->getActiveSheet()->mergeCells($column_letters[0].'1:'.end($column_letters).'1');
+        $spreadsheet->getActiveSheet()->setCellValueExplicit($column_letters[0].'1', 'DELIVERY REPORTS', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+        $spreadsheet->getActiveSheet()->getStyle($column_letters[0].'1:'.end($column_letters).'2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle($column_letters[0].'1:'.end($column_letters).'2')->applyFromArray($style_header);
+
+        $i = 0;
+        foreach ($column_data as $col_key => $col_value) {
+            $spreadsheet->getActiveSheet()->setCellValueExplicit($column_letters[$i].'2', $col_key, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+
+            $i++;
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+        if (!empty($data)) {
+            $no = 1;
+            $row = 3;
+            $idx_data = 0;
+            $letter = $column_letters[0];
+
+            foreach ($data as $value) {
+                if ($idx_data == count($column_data)) {
+                    $idx_data = 0;
+                    $letter = $column_letters[0];
+                }
+
+                foreach ($column_data as $col_key => $col_value) {
+                    switch ($col_value) {
+                        case 'no':
+                            $spreadsheet->getActiveSheet()->setCellValueExplicit($letter.$row, $no++, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                        break;
+                        case 'deliveryReportChargable':
+                            $val = $value->deliveryReport->chargable ?? '-';
+
+                            $spreadsheet->getActiveSheet()->setCellValueExplicit($letter.$row, $val, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                        break;
+                        case 'deliveryReportDRSource':
+                            $val = $value->deliveryReport->drsource ?? '-';
+
+                            $spreadsheet->getActiveSheet()->setCellValueExplicit($letter.$row, $val, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                        break;
+                        case 'deliveryReportStatus':
+                            $val = $value->deliveryReport->status ?? '-';
+
+                            $spreadsheet->getActiveSheet()->setCellValueExplicit($letter.$row, $val, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                        break;
+                        case 'deliveryReportRemark':
+                            $val = $value->deliveryReport->description ?? '-';
+
+                            $spreadsheet->getActiveSheet()->setCellValueExplicit($letter.$row, $val, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                        break;
+                        default:
+                            $spreadsheet->getActiveSheet()->setCellValueExplicit($letter.$row, $value[$col_value], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                        break;
+                    }
+
+                    $letter++;
+                    $idx_data++;
+                }
+
+                $row++;
+            }
+        }
+
+        $styleArray = array(
+            'borders' => array(
+                'allborders' => array(
+                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                )
+            )
+        );
+        $spreadsheet->getActiveSheet()->getStyle('A1:' .$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow())->applyFromArray($styleArray);
+
+        $writer = new Xlsx($spreadsheet);
+
+        $file_name = 'report-delivery-' . date('YmdHis') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $file_name . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
     }
 }

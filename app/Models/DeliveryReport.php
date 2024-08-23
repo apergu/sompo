@@ -25,4 +25,9 @@ class DeliveryReport extends Model
         'chargable',
         'drsource'
     ];
+
+    public function mBlasting()
+    {
+        return $this->belongsTo(Blasting::class, 'referenceid', 'TxReference');
+    }
 }
