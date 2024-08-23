@@ -27,8 +27,8 @@
     <div class="row d-flex justify-content-between">
         <div class="col-md-4">
             @php $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://'; @endphp
-            {{-- <form action="{{ route('reports.index') }}" method="GET"> --}}
-            <form action="{{ $protocol.$_SERVER['HTTP_HOST'] }}/reports" method="GET">
+            <form action="https://smsgw.sompo.co.id/reports" method="GET">
+            {{-- <form action="{{ $protocol.$_SERVER['HTTP_HOST'] }}/reports" method="GET"> --}}
                 <div class="col-md-12">
                     <input type="text" name="from_date" class="form-control" placeholder="From Date" value="{{ $start_date }}" id="dateFrom" />
                 </div>
