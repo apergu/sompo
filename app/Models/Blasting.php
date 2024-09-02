@@ -21,4 +21,9 @@ class Blasting extends Model
     {
         return $this->belongsTo(DeliveryReport::class, 'TxReference', 'referenceid');
     }
+
+    public function SMSCategory()
+    {
+        return $this->belongsTo(SMSCategory::class, 'CategoryID', 'CategoryID');
+    }
 }
