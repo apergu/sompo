@@ -19,8 +19,8 @@ class ReportsController extends Controller
 {
     public function index(Request $request)
     {
-        $start_date = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $end_date = Carbon::now()->endOfMonth()->format('Y-m-d');
+        $start_date = $request->has('from_date') ? $request->from_date : Carbon::now()->startOfMonth()->format('Y-m-d');
+        $end_date = $request->has('to_date') ? $request->to_date : Carbon::now()->endOfMonth()->format('Y-m-d');
         $search = $request->has('search') ? $request->search : '';
         $params = '';
 
@@ -28,9 +28,10 @@ class ReportsController extends Controller
             $params = '?from_date='.$request->from_date.'&to_date='.$request->to_end.'&search='.$search;
         }
 
-        $filters = ['ReceiverName', 'MobileNo', 'TxReference', 'Message'];
+        $filters = ['ReceiverName', 'MobileNo', 'TxReference', 'Message', 'Sompo_Category_SMS.CategoryDescription'];
 
-        $delivery_reports = Blasting::with('deliveryReport')
+        $delivery_reports = Blasting::with(['deliveryReport', 'SMSCategory'])
+            ->join('Sompo_Category_SMS', 'Broadcast.CategoryID', '=', 'Sompo_Category_SMS.CategoryID')
             ->where(function ($query) use ($request, $filters) {
                 foreach ($filters as $filter) {
                     if ($request->has('search')) {
@@ -252,9 +253,10 @@ class ReportsController extends Controller
 
     public function downloadExcel(Request $request)
     {
-        $filters = ['ReceiverName', 'MobileNo', 'TxReference', 'Message'];
+        $filters = ['ReceiverName', 'MobileNo', 'TxReference', 'Message', 'Sompo_Category_SMS.CategoryDescription'];
 
-        $data = Blasting::with('deliveryReport')
+        $data = Blasting::with(['deliveryReport', 'SMSCategory'])
+            ->join('Sompo_Category_SMS', 'Broadcast.CategoryID', '=', 'Sompo_Category_SMS.CategoryID')
             ->where(function ($query) use ($request, $filters) {
                 foreach ($filters as $filter) {
                     if ($request->has('search')) {
@@ -294,6 +296,7 @@ class ReportsController extends Controller
             'Send Date' => 'DeliveryDateTime',
             'Customer Name' => 'ReceiverName',
             'Contact' => 'MobileNo',
+            'Campaign Name' => 'CategoryID',
             'Content' => 'Message',
             'Reference ID' => 'TxReference',
             'Chargable' => 'deliveryReportChargable',
@@ -343,6 +346,11 @@ class ReportsController extends Controller
                     switch ($col_value) {
                         case 'no':
                             $spreadsheet->getActiveSheet()->setCellValueExplicit($letter.$row, $no++, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                        break;
+                        case 'CategoryID':
+                            $val = $value->SMSCategory->CategoryDescription ?? '-';
+
+                            $spreadsheet->getActiveSheet()->setCellValueExplicit($letter.$row, $val, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                         break;
                         case 'deliveryReportChargable':
                             $val = $value->deliveryReport->chargable ?? '-';

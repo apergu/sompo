@@ -62,6 +62,7 @@
                 <th>Sent Date</th>
                 <th>Customer Name</th>
                 <th>Contact</th>
+                <th>Campaign Name</th>
                 <th>Content</th>
                 <th>Reference ID</th>
                 <th>Chargable</th>
@@ -84,6 +85,7 @@
                         <td>{{ $val->DeliveryDateTime ?? '-' }}</td>
                         <td>{{ $val->ReceiverName ?? '-' }}</td>
                         <td>{{ $val->MobileNo ?? '-' }}</td>
+                        <td>{{ $val->SMSCategory->CategoryDescription ?? '-' }}</td>
                         <td>{{ $val->Message ?? '-' }}</td>
                         <td>{{ $val->deliveryReport->referenceid ?? '-' }}</td>
                         <td>{{ $val->deliveryReport->chargable ?? '-' }}</td>
