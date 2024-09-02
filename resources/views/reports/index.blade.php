@@ -26,9 +26,18 @@
 
     <div class="row d-flex justify-content-between">
         <div class="col-md-4">
-            @php $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://'; @endphp
-            <form action="https://smsgw.sompo.co.id/reports" method="GET">
-            {{-- <form action="{{ $protocol.$_SERVER['HTTP_HOST'] }}/reports" method="GET"> --}}
+            @php
+                $uri = "";
+                if ($_SERVER['SERVER_NAME'] === env("APP_IP_LOCALHOST")) {
+                    $uri = "http://".env("APP_IP_LOCALHOST").":8000";
+                } else if ($_SERVER['SERVER_NAME'] === env("APP_IP_LOCALSOMPO")) {
+                    $uri = "http://".env("APP_IP_LOCALSOMPO").":9005";
+                } else {
+                    $uri = env("APP_IP_DOMAIN");
+                }
+            @endphp
+            {{-- <form action="https://smsgw.sompo.co.id/reports" method="GET"> --}}
+            <form action="{{ $uri }}/reports" method="GET">
                 <div class="col-md-12">
                     <input type="text" name="from_date" class="form-control" placeholder="From Date" value="{{ $start_date }}" id="dateFrom" />
                 </div>
