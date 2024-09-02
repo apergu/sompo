@@ -25,9 +25,18 @@
             @endif
             <div class="row">
                 <div class="col-md-12">
-                    @php $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://'; @endphp
-                    <form action="https://smsgw.sompo.co.id/check-login" method="POST" enctype="multipart/form-data"> @csrf
-                    {{-- <form action="{{ $protocol.$_SERVER['HTTP_HOST'] }}/check-login" method="POST" enctype="multipart/form-data"> @csrf --}}
+                    @php
+                        $uri = "";
+                        if ($_SERVER['SERVER_NAME'] === env("APP_IP_LOCALHOST")) {
+                            $uri = "http://".env("APP_IP_LOCALHOST").":8000";
+                        } else if ($_SERVER['SERVER_NAME'] === env("APP_IP_LOCALSOMPO")) {
+                            $uri = "http://".env("APP_IP_LOCALSOMPO").":9005";
+                        } else {
+                            $uri = env("APP_IP_DOMAIN");
+                        }
+                    @endphp
+                    {{-- <form action="https://smsgw.sompo.co.id/check-login" method="POST" enctype="multipart/form-data"> @csrf --}}
+                    <form action="{{ $uri }}/check-login" method="POST" enctype="multipart/form-data"> @csrf
                         <div data-mdb-input-init class="form-outline mb-4">
                             <label class="form-label">Username</label>
                             <input type="text" name="username" class="form-control" />
