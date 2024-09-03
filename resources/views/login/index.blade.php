@@ -34,6 +34,7 @@
                         } else {
                             $uri = env("APP_IP_DOMAIN");
                         }
+                        echo $uri;
                     @endphp
                     {{-- <form action="https://smsgw.sompo.co.id/check-login" method="POST" enctype="multipart/form-data"> @csrf --}}
                     <form action="{{ $uri }}/check-login" method="POST" enctype="multipart/form-data"> @csrf
