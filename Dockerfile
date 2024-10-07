@@ -133,7 +133,7 @@ RUN pecl install sqlsrv pdo_sqlsrv \
 RUN mkdir -p /var/www/${PROJECT}
 WORKDIR /var/www/${PROJECT}
 
-COPY .env.dev .env
+COPY .env.prod .env
 COPY . .
 
 # Install Composer dependencies
