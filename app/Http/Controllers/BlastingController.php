@@ -28,6 +28,8 @@ class BlastingController extends Controller
             ->whereDate('BroadcastDate', Carbon::now()->format('Y-m-d'))
             ->get();
 
+            Log::info("Blasting: ".json_encode($blasting));
+
             if (count($blasting) > 0) {
                 $host = $this->ssh_host;
                 $port = $this->ssh_port;
